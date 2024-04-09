@@ -59,14 +59,15 @@ namespace ZXing.Net.Maui
 				// Preview
 				cameraPreview = new AndroidX.Camera.Core.Preview.Builder().Build();
 				cameraPreview.SetSurfaceProvider(previewView.SurfaceProvider);
+                
+                // Frame by frame analyze
+                imageAnalyzer = new ImageAnalysis.Builder()
+                    .SetDefaultResolution(new Android.Util.Size(640, 480))
+                    .SetOutputImageFormat(ImageAnalysis.OutputImageFormatRgba8888) // FIX: https://github.com/Redth/ZXing.Net.Maui/issues/107
+                    .SetBackpressureStrategy(ImageAnalysis.StrategyKeepOnlyLatest)
+                    .Build();
 
-				// Frame by frame analyze
-				imageAnalyzer = new ImageAnalysis.Builder()
-					.SetDefaultResolution(new Android.Util.Size(640, 480))
-					.SetBackpressureStrategy(ImageAnalysis.StrategyKeepOnlyLatest)
-					.Build();
-
-				imageAnalyzer.SetAnalyzer(cameraExecutor, new FrameAnalyzer((buffer, size) =>
+                imageAnalyzer.SetAnalyzer(cameraExecutor, new FrameAnalyzer((buffer, size) =>
 					FrameReady?.Invoke(this, new CameraFrameBufferEventArgs(new Readers.PixelBufferHolder { Data = buffer, Size = size }))));
 
 				UpdateCamera();
